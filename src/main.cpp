@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
     if (argc != 3) { 
-        cout << "Usagem: ./app k (int) prefix (string)" << endl;
+        cout << "Usage: ./app k (int) prefix (string)" << endl;
         return 1;
     }
 
@@ -23,6 +23,14 @@ int main(int argc, char* argv[]) {
 
     std::vector<Game*> results = trie.autocomplete(prefix, k);
 
+    if (results.empty()) {
+        cout << "No results found"  << endl;
+        return 0;
+    }
+
+    for (int i = 0; i < results.size(); i++) {
+        cout << "\n" << results[i]->title << " | " << results[i]->description << " | " << results[i]->popularity << endl;
+    }
     
     return 0;
 }

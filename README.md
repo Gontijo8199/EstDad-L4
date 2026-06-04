@@ -5,6 +5,30 @@
 - Rafael Gontijo Ferreira
 - Rudá Dantas Ruoso Brandão
 
+## Estrutura do Projeto
+
+<pre>
+├── bins
+│   ├── app
+│   └── check_database
+├── enunciados
+│   ├── COMO_TESTAR_BASE.md
+│   └── lista_4.md
+├── Makefile
+├── README.md
+├── relatorio
+│   └── relatorio.tex
+└── src
+    ├── check_database.cpp
+    ├── Game.cpp
+    ├── Game.hpp
+    ├── GamesDatabase.cpp
+    ├── GamesDatabase.hpp
+    ├── main.cpp
+    ├── Trie.cpp
+    └── Trie.hpp
+</pre>
+
 ## Compilação
 
 #### Pré-requisitos

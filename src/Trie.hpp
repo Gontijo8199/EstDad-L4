@@ -42,6 +42,10 @@ public:
     // percorre toda a subárvore coletando jogos onde isEndOfTitle == true
     // facilita o autocomplete
     void collectGamesSubtree(TrieNode* node, std::vector<Game*>& games);
+
+    // fix: bugs de conversão
+    int charToIndex(char c);
+
 };
 
 #endif
