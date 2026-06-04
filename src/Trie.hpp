@@ -1,10 +1,10 @@
 #ifndef TRIE_HPP
 #define TRIE_HPP
 
-#include<Game.hpp>
-#include<vector>
+#include "Game.hpp"
+#include <vector>
 
-const int ALPHABET_SIZE = 26; // a-z
+#define ALPHABET_SIZE 36 // a-z (0-25) + 0-9 (26-35)
 
 class TrieNode {
 

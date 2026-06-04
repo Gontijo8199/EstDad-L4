@@ -1,3 +1,6 @@
 bins/*
 
 !bins/.gitkeep
+
+# para outros não terem que compilar
+!bins/check_database 
