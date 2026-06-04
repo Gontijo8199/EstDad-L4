@@ -38,6 +38,10 @@ public:
     void sortResults(std::vector<Game*>& games);
 
     // Outros métodos auxiliares, se necessário
+
+    // percorre toda a subárvore coletando jogos onde isEndOfTitle == true
+    // facilita o autocomplete
+    void collectGamesSubtree(TrieNode* node, std::vector<Game*>& games);
 };
 
 #endif

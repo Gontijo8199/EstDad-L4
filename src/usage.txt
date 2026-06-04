@@ -1,0 +1,7 @@
+# compilar
+
+make
+
+# limpar
+
+make clean
