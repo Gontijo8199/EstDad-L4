@@ -36,6 +36,7 @@ public:
 
     std::string toSearchKey(std::string text);
     void sortResults(std::vector<Game*>& games);
+    std::vector<Game*> selectK(std::vector<Game*>& games, int k);
 
     // Outros métodos auxiliares, se necessário
 

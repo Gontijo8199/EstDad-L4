@@ -1,5 +1,6 @@
 #include "Trie.hpp"
 #include <cctype>
+#include <iostream>
 
 int Trie::charToIndex(char c) {
     if (c >= 'a' && c <= 'z') return c - 'a';
@@ -103,6 +104,7 @@ std::vector<Game*> Trie::autocomplete(std::string prefix, int k) {
 
     collectGamesSubtree(current, results);
     sortResults(results);
+    // selectK(results, k);
 
     if (results.size() > k) {
         results.resize(k);
@@ -125,14 +127,16 @@ std::string Trie::toSearchKey(std::string text) {
 void Trie::sortResults(std::vector<Game*>& games) {
     for (int i = 1; i < games.size(); i++) {
         Game* key = games[i];
-        int j = i - 1;
+        std::string key_title = toSearchKey(key->title);
+        bool shouldSwap;
 
+        int j = i - 1;
         while (j >= 0) {
-            bool shouldSwap;
+            shouldSwap = false;
             if (games[j]->popularity != key->popularity)
                 shouldSwap = games[j]->popularity < key->popularity;
             else
-                shouldSwap = games[j]->title > key->title;
+                shouldSwap = toSearchKey(games[j]->title) > key_title;
 
             if (!shouldSwap) break;
 
@@ -142,4 +146,34 @@ void Trie::sortResults(std::vector<Game*>& games) {
 
         games[j + 1] = key;
     }
+}
+
+
+// seleciona os k jogos com maior popularidade em O(k*n)
+// espera-se k << n, logo, não é necessário ordenar tudo
+std::vector<Game*> Trie::selectK(std::vector<Game*>& games, int k) {
+    std::vector<Game*> results = {};
+    if (k <= 0) return results;
+
+    Game* temp;
+    for (int i=0; i<k; i++) {
+        for (int j=i+1; j<games.size(); j++) {
+            if (games[j]->popularity > games[i]->popularity) {
+                temp = games[j];
+                games[j] = games[i];
+                games[i] = temp;
+            }
+            else if (games[j]->popularity == games[i]->popularity &&
+                toSearchKey(games[j]->title) < toSearchKey(games[i]->title)) {
+                temp = games[j];
+                games[j] = games[i];
+                games[i] = temp;
+            }
+        }
+
+        std::cout << games[i]->title << std::endl;
+        results.push_back(games[i]);
+    }
+
+    return results;
 }
