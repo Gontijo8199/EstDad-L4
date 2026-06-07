@@ -171,7 +171,6 @@ std::vector<Game*> Trie::selectK(std::vector<Game*>& games, int k) {
             }
         }
 
-        std::cout << games[i]->title << std::endl;
         results.push_back(games[i]);
     }
 

@@ -1,0 +1,108 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath, amssymb, graphicx, float, setspace, hyperref}
+\usepackage[top=1.5cm,bottom=1.5cm,left=1.75cm,right=1.75cm]{geometry}
+\usepackage[tiny]{titlesec} 
+\usepackage{parskip, booktabs, array}
+\usepackage{listings, tabularx}
+
+\hypersetup{colorlinks=true, allcolors=blue}
+
+\begin{document}
+\onehalfspacing
+\begin{center}
+    \vspace*{0.5cm}
+    {\LARGE \textbf{Trabalho 04: Sistema de Autocomplete de Jogos com Trie}} \\
+    \textit{Estrutura de Dados} \\
+    \vspace{0.8cm}
+
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \textbf{Rafael Gontijo Ferreira} \\
+        \href{mailto:rafael.ferreira.2@fgv.edu.br}{\footnotesize \texttt{rafael.ferreira.2@fgv.edu.br}}
+    \end{minipage}
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \textbf{Rudá Dantas Ruoso Brandão} \\
+        \href{mailto:rudabrandao@ruoso.com}{\footnotesize \texttt{rudabrandao@ruoso.com}}
+    \end{minipage}
+    
+    \vspace{0.8cm}
+\end{center}
+
+\section{Descrição do Projeto}
+ 
+Este trabalho apresenta a implementação de um sistema de \textit{autocomplete} para para um buscador de jogos online, desenvolvido como quarta atividade da disciplina de Estrutura de Dados. O objetivo central é desemvolver um sistema capaz de receber o prefixo de um jogo e indicar quais são os jogos mais populares que começam com ele.
+ 
+O sistema foi implementado via \texttt{Trie} e suporta as seguintes operações fundamentais:
+ 
+\begin{itemize}
+    \item \textbf{Inserção:} Adiciona o caminho referente a um título na estrutura.
+    \item \textbf{Busca:} Verifica se uma dada chave de busca está representada na \texttt{Trie}.
+    \item \textbf{Recuperação:} Recuperação da lista dos jogos incluídos em uma dada sub-árvore.
+    \item \textbf{Ordenação:} Ordena a lista por popularidade de forma decrescente; desempate por título.
+    \item \textbf{Autocomplete:} Utiliza das operações acima para indicar quais são os jogos mais populares começam com um dado prefixo.
+\end{itemize}
+
+\section*{Representação da \texttt{Trie}}
+ 
+\subsection*{Tamanho do alfabeto e mapeamento de caracteres}
+ 
+A Trie foi implementada com um alfabeto de \textbf{36 símbolos}: as 26 letras minúsculas do alfabeto latino (\texttt{a}--\texttt{z}) mais os 10 dígitos decimais (\texttt{0}--\texttt{9}). Essa escolha cobre todos os caracteres válidos especificados pelo enunciado, sendo os espaços descartados antes da inserção.
+ 
+O mapeamento de um caractere para o índice do array de filhos é realizado pelo método auxiliar \texttt{charToIndex}:
+ 
+\begin{itemize}
+  \item letras minúsculas: \texttt{c - 'a'}, produzindo índices de $0$ a $25$;
+  \item dígitos: \texttt{c - '0' + 26}, produzindo índices de $26$ a $35$.
+\end{itemize}
+ 
+Caracteres fora desses dois grupos retornam $-1$ e são ignorados durante a travessia. Cada nó mantém um array \texttt{children[36]} inicializado com \texttt{nullptr}.
+ 
+\subsection*{Normalização para chave de busca}
+ 
+O método \texttt{toSearchKey} normaliza qualquer título ou prefixo em dois passos: descarta todos os espaços em branco via \texttt{isspace} e converte cada caractere restante para minúsculo via \texttt{tolower}. Com isso, entradas como \texttt{"Half Life"}, \texttt{"halflife"} e \texttt{"HALF LIFE"} produzem a mesma chave interna \texttt{"halflife"}, garantindo buscas \textit{case-insensitive} e insensíveis a espaços em todos os métodos que interagem com a \texttt{Trie}.
+ 
+\section*{Funcionamento dos métodos}
+ 
+\textbf{\texttt{insert}}: normaliza o título do jogo para sua chave de busca e percorre a \texttt{Trie} nó a nó, criando filhos ausentes conforme necessário. Ao chegar ao nó terminal da chave, define \texttt{isEndOfTitle = true} e armazena o ponteiro para o objeto \texttt{Game} já existente no array da base de dados, sem criar cópias.
+ 
+\textbf{\texttt{contains}}: normaliza o título recebido e tenta percorrer o caminho correspondente na \texttt{Trie}. Retorna \texttt{true} apenas se todo o caminho existe \emph{e} o nó final tem \texttt{isEndOfTitle = true}. Qualquer filho ausente interrompe a busca e retorna \texttt{false} imediatamente.
+ 
+\textbf{\texttt{autocomplete}}: normaliza o prefixo e navega até o nó correspondente na \texttt{Trie}. A partir daí, o método auxiliar \texttt{collectGamesSubtree} realiza uma busca em profundidade (DFS), varrendo todos os filhos em ordem de índice e coletando ponteiros de jogos nos nós terminais. O vetor coletado é então ordenado por \texttt{sortResults} e truncado aos $k$ primeiros elementos com \texttt{resize}.
+ 
+\textbf{\texttt{sortResults}}: ordena o vetor de ponteiros via \textit{insertion sort}. O critério primário é popularidade decrescente; em empate, utiliza-se a chave de busca do título, obtida chamando \texttt{toSearchKey} sobre o título original, em ordem lexicográfica crescente. Essa abordagem corrige uma limitação presente em versões anteriores que comparavam o título bruto, sem normalização.
+ 
+\textbf{\texttt{selectK}}: alternativa ao par \texttt{sortResults} $+$ \texttt{resize}. Executa $k$ passagens sobre o vetor, a cada passagem promovendo o elemento de maior popularidade (com desempate por chave de busca) para a posição $i$. Retorna apenas os $k$ selecionados. O custo é $O(k \cdot r)$, vantajoso quando $k \ll r$. O método está implementado mas, na versão atual, \texttt{autocomplete} utiliza \texttt{sortResults} seguido de \texttt{resize}, mantendo as assinaturas de função exigidas e deixando \texttt{selectK} disponível como alternativa.
+ 
+\section*{Análise de custo}
+ 
+Consideram-se os parâmetros $n$ (total de jogos), $L$ (comprimento da chave do título), $p$ (comprimento da chave do prefixo), $s$ (nós visitados na subárvore do prefixo) e $r$ (jogos encontrados para o prefixo).
+ 
+\begin{center}
+\begin{tabular}{>{\bfseries}lll}
+\toprule
+Operação & Complexidade & Origem do custo \\
+\midrule
+\texttt{insert}         & $O(L)$                  & Percurso de $L$ nós na Trie \\
+\texttt{contains}       & $O(L)$                  & Percurso de $L$ nós na Trie \\
+\texttt{autocomplete}   & $O(p + s + r^2)$          & Navegação ($p$), DFS ($s$), insertion sort ($r^2$) \\
+\texttt{sortResults}        & $O(r^2)$          & Implementado via insertion sort \\
+\texttt{selectK}        & $O(k \cdot r)$          & $k$ passagens lineares sobre $r$ candidatos \\
+\bottomrule
+\end{tabular}
+\end{center}
+ 
+A construção da \texttt{Trie}, feita uma única vez, custa $O(n \cdot L)$. O custo de cada consulta é dominado pela DFS ($s$ nós) e pela ordenação de $r$ resultados. Como $r \leq s \leq$ total de nós da \texttt{Trie}, e prefixos mais longos reduzem $s$ drasticamente, o sistema é muito eficiente para buscas específicas. Para cenários com $k \ll r$, \texttt{selectK} reduz o custo de ordenação de $O(r^2)$ para $O(k \cdot r)$.
+ 
+\section*{Comparação, memória e compartilhamento de prefixos}
+ 
+\textbf{Solução ingênua}: percorrer o array de $n$ jogos a cada consulta, verificando se o título começa com o prefixo após normalização. O custo por consulta é $O(n \cdot L)$, independente do prefixo, tornando-se proibitivo à medida que a base cresce.
+ 
+\textbf{Com a \texttt{Trie}}: após a inserção em $O(n \cdot L)$, cada consulta custa $O(p + s + r^2)$, com $s$ tipicamente muito menor que $n$ para prefixos específicos. O ganho cresce com o tamanho da base e com a especificidade do prefixo.
+ 
+\textbf{Custo de memória}: cada nó aloca um array fixo de 36 ponteiros (288 bytes em plataformas de 64 bits), independentemente de quantos filhos estão ocupados. Para uma base esparsa, o consumo total pode superar o custo de simplesmente armazenar os títulos. O \textbf{compartilhamento de prefixos} mitiga esse custo: títulos com início comum, como \texttt{Hades}, \texttt{Halo} e \texttt{Half Life}, compartilham os nós \texttt{h} e \texttt{a}, evitando duplicação. O tamanho do alfabeto determina diretamente o tamanho de cada nó: reduzir o alfabeto diminuiria o consumo por nó, mas exigiria um mapeamento de caracteres mais elaborado.
+ 
+\end{document}

@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     }
 
     for (int i = 0; i < results.size(); i++) {
-        cout << "\n" << results[i]->title << " | " << results[i]->description << " | " << results[i]->popularity << endl;
+        cout << results[i]->title << " | " << results[i]->description << " | " << results[i]->popularity << endl;
     }
     
     return 0;
